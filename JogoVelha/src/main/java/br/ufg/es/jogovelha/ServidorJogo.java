@@ -32,6 +32,8 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
     private String apelido;
     private DefaultListModel onlineUsers;
     private Random random = new Random();
+    private MinhaConexao novaConexao;
+    private Socket socketCliente;
 
     public ServidorJogo(NewJFrame mainFrame, ServerSocket server,
             String apelido, DefaultListModel onlineUsers) {
@@ -54,7 +56,7 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
         try {
 
             String msgEnviar, msgReceb, apelidoOnline;
-            int porta;
+            int porta = 0;
 
             // escutando na porta tal
             while (true) {
@@ -63,7 +65,7 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
                     Socket connection = server.accept();
 
                     // cria conexão com cliente
-                    MinhaConexao novaConexao = new MinhaConexao(mainFrame, connection);
+                    novaConexao = new MinhaConexao(mainFrame, connection);
                     // processa as comunicações com o cliente
                     novaConexao.execute();
                 } else {
@@ -80,8 +82,9 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
                             enviarMsg(msgEnviar,
                                     packet.getAddress(),
                                     20181);
-
-                            onlineUsers.clear();
+                            apelidoOnline = msgReceb.substring(5, 
+                                    msgReceb.length()) + "-" + packet.getAddress();
+                            onlineUsers.addElement(apelidoOnline);
                             break;
                         case "02":
                             // adicionar o remetente à lista de usuários ativos
@@ -121,14 +124,19 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
                             break;
                         case "05":
                             // criar conexão TCP e responder com mensagem 6 para o remetente
-                            if(!msgReceb.contains("|")){
+                            if(!msgReceb.contains("|0")){
                                 msgEnviar = "06007OK";
+                                mainFrame.setPorta(Integer.parseInt(msgReceb.split("|")[1]));
+                                server = new ServerSocket(porta, 10, server.getInetAddress());
+                                inGame = true;
                                 enviarMsg(msgEnviar, packet.getAddress(), 20181);
+                            } else {
+                                
                             }
                             break;
                         case "06":
                             // conectar na porta informada
-                            inGame = true;
+                            socketCliente = new Socket(packet.getAddress(), porta);
                             break;
                     }
                 }

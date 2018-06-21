@@ -39,6 +39,8 @@ public class NewJFrame extends javax.swing.JFrame {
     private ServidorJogo servidor;
     private static DatagramSocket socketBroadcast = null;
     private String apelido;
+    private String adversario;
+    private int porta;
 
     /**
      * Creates new form NewJFrame
@@ -86,7 +88,7 @@ public class NewJFrame extends javax.swing.JFrame {
             apelido = JOptionPane.showInputDialog("Insira o seu apelido:");
             mensagem += String.format("%03d", apelido.length() + 5);
             mensagem += apelido;
-            broadcast(mensagem, InetAddress.getByName("255.255.255.255"));
+            enviarMsg(mensagem, InetAddress.getByName("255.255.255.255"), 20181);
         } catch (IOException ex) {
             Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Erro no envio da mensagem de "
@@ -546,15 +548,39 @@ public class NewJFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_exitJButtonActionPerformed
 
     private void inviteFriendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inviteFriendButtonActionPerformed
-        // TODO add your handling code here:
+        String address = onlineList.getSelectedValue().split("-")[1];
+        String message = "04";
+        message += String.format("%03d", apelido.length() + 5);
+        message += apelido;
+        try {
+            enviarMsg(message, InetAddress.getByName(address), 20181);
+            adversario = onlineList.getSelectedValue();
+        } catch (IOException ex) {
+            Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_inviteFriendButtonActionPerformed
 
     private void giveUpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_giveUpButtonActionPerformed
-        // TODO add your handling code here:
+        String message = "10005";
+        try {
+            enviarMsg(message, InetAddress.getByName(adversario.split("-")[1]), porta);
+        } catch (IOException ex) {
+            Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_giveUpButtonActionPerformed
 
     private void refreshOnlineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshOnlineButtonActionPerformed
-        // TODO add your handling code here:
+        try {
+            String mensagem = "01";
+            mensagem += String.format("%03d", apelido.length() + 5);
+            mensagem += apelido;
+            enviarMsg(mensagem, InetAddress.getByName("255.255.255.255"), 20181);
+            onlineUsers.clear();
+        } catch (IOException ex) {
+            Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Erro no envio da mensagem de "
+                    + "login", "Login", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_refreshOnlineButtonActionPerformed
 
     /**
@@ -643,7 +669,7 @@ public class NewJFrame extends javax.swing.JFrame {
             String mensagem = "03";
             mensagem += String.format("%03d", apelido.length() + 5);
             mensagem += apelido;
-            broadcast(mensagem, InetAddress.getByName("255.255.255.255"));
+            enviarMsg(mensagem, InetAddress.getByName("255.255.255.255"), 20181);
             
         } catch (IOException ex) {
             String msg = "Erro ao encerrar o server.\n" + ex.getMessage();
@@ -654,7 +680,7 @@ public class NewJFrame extends javax.swing.JFrame {
         }
     }
 
-    public void broadcast(String broadcastMessage, InetAddress address)
+    public void enviarMsg(String broadcastMessage, InetAddress address, int port)
             throws IOException {
 
         socketBroadcast = new DatagramSocket();
@@ -662,9 +688,17 @@ public class NewJFrame extends javax.swing.JFrame {
 
         byte[] buffer = broadcastMessage.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, 20181);
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
         socketBroadcast.send(packet);
         socketBroadcast.close();
+    }
+
+    public void setAdversario(String adversario) {
+        this.adversario = adversario;
+    }
+
+    public void setPorta(int porta) {
+        this.porta = porta;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

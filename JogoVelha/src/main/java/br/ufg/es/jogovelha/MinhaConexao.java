@@ -75,6 +75,7 @@ public class MinhaConexao extends SwingWorker<Boolean, String>  {
                 if (incommingMessage != null)
                 {
                     String msg = "Recebida: " + incommingMessage;
+                    publish(msg);
                     // lidar com a mensagem recebida
                 }
                 else
@@ -106,12 +107,12 @@ public class MinhaConexao extends SwingWorker<Boolean, String>  {
         }
     }
     
-//    @Override
-//    protected void process(List<String> msg)
-//    {
-//        for (int i = 0; i < msg.size(); i++)
-//            mensagens.addElement(msg.get(i));
-//    }
+    @Override
+    protected void process(List<String> msg)
+    {
+        for (int i = 0; i < msg.size(); i++)
+            JOptionPane.showMessageDialog(null, msg.get(i));
+    }
     
     public boolean enviaMensagem(String msg)
     {
