@@ -72,10 +72,32 @@ public class MinhaConexao extends SwingWorker<Boolean, String>  {
             try
             {
                 incommingMessage = (String)bfr.readLine();
+                
+                // Recebeu uma mensagem?
                 if (incommingMessage != null)
                 {
                     String msg = "Recebida: " + incommingMessage;
                     publish(msg);
+                    
+                    switch(incommingMessage.substring(0, 2)){
+                        case "07":
+                            // my turn? send
+                            break;
+                        
+                        case "08":
+                            // did he/she win? 
+                                // send message 9
+                                // send message 8
+                            // send message 8
+                            break;
+                        
+                        case "09":
+                            // clear board, add 1 victory
+                            break;
+                            
+                        case "10":
+                            // terminate connection
+                    }
                     // lidar com a mensagem recebida
                 }
                 else
