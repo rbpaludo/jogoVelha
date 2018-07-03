@@ -740,6 +740,7 @@ public class NewJFrame extends javax.swing.JFrame {
                 bloqueiaTabuleiro(true);
                 conexao = null;
                 derrotas = 0;
+                servidor.setInGame(false);
             }
         } else if (isFull()) {
             
@@ -798,6 +799,7 @@ public class NewJFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Você ganhou!");
             bloqueiaTabuleiro(true);
             vitorias = 0;
+            servidor.setInGame(false);
         }
     }
     
