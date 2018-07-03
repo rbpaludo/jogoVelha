@@ -735,6 +735,12 @@ public class NewJFrame extends javax.swing.JFrame {
             derrotas++;
             derrotasLabel.setText("Vitorias: " + derrotas);
             esvaziaTabuleiro();
+            if(derrotas == 5){
+                JOptionPane.showMessageDialog(rootPane, "Voce perdeu...");
+                bloqueiaTabuleiro(true);
+                conexao = null;
+                derrotas = 0;
+            }
         } else if (isFull()) {
             
             esvaziaTabuleiro();
@@ -788,6 +794,11 @@ public class NewJFrame extends javax.swing.JFrame {
     public void incrementaVitoria(){
         this.vitorias++;
         this.vitoriasLabel.setText("Vitórias: " + vitorias);
+        if(vitorias == 5){
+            JOptionPane.showMessageDialog(rootPane, "Você ganhou!");
+            bloqueiaTabuleiro(true);
+            vitorias = 0;
+        }
     }
     
     public boolean isFull(){
