@@ -39,9 +39,10 @@ public class NewJFrame extends javax.swing.JFrame {
     private ServidorJogo servidor;
     private String apelido;
     private String adversario;
-    private String peca;
-    private String pecaAdversario;
+    private final String peca = "X";
+    private final String pecaAdversario = "O";
     private int porta;
+    private int vitorias, derrotas;
     private boolean estaEscutando;
     InetAddress addr;
 
@@ -50,9 +51,10 @@ public class NewJFrame extends javax.swing.JFrame {
      */
     public NewJFrame() {
         initComponents();
-        
+
         porta = 20181;
         estaEscutando = false;
+        bloqueiaTabuleiro(true);
         
         // título do programa e centraliza janela na tela
         this.setTitle("Jogo das Véia");
@@ -128,6 +130,8 @@ public class NewJFrame extends javax.swing.JFrame {
         casa3Label = new javax.swing.JButton();
         casa4Label = new javax.swing.JButton();
         casa9Label = new javax.swing.JButton();
+        vitoriasLabel = new javax.swing.JLabel();
+        derrotasLabel = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -146,11 +150,11 @@ public class NewJFrame extends javax.swing.JFrame {
 
         player1Label.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         player1Label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        player1Label.setText("?");
+        player1Label.setText("X");
 
         player2Label.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         player2Label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        player2Label.setText("?");
+        player2Label.setText("O");
 
         player2NameLabel.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         player2NameLabel.setText("O outro");
@@ -217,59 +221,75 @@ public class NewJFrame extends javax.swing.JFrame {
             }
         });
 
+        casa2Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
+        casa2Label.setEnabled(false);
         casa2Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa2LabelActionPerformed(evt);
             }
         });
 
+        casa6Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa6Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa6LabelActionPerformed(evt);
             }
         });
 
+        casa7Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa7Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa7LabelActionPerformed(evt);
             }
         });
 
+        casa1Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa1Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa1LabelActionPerformed(evt);
             }
         });
 
+        casa8Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa8Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa8LabelActionPerformed(evt);
             }
         });
 
+        casa5Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa5Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa5LabelActionPerformed(evt);
             }
         });
 
+        casa3Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa3Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa3LabelActionPerformed(evt);
             }
         });
 
+        casa4Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa4Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa4LabelActionPerformed(evt);
             }
         });
 
+        casa9Label.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
         casa9Label.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 casa9LabelActionPerformed(evt);
             }
         });
+
+        vitoriasLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        vitoriasLabel.setText("Vitórias:");
+
+        derrotasLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        derrotasLabel.setText("Vitórias:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -278,12 +298,13 @@ public class NewJFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(37, 37, 37)
+                        .addGap(24, 24, 24)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                            .addComponent(player1Label)
-                            .addComponent(jLabel12))
-                        .addGap(33, 33, 33)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(vitoriasLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel12)
+                            .addComponent(player1Label))
+                        .addGap(21, 21, 21)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(casa1Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -294,39 +315,40 @@ public class NewJFrame extends javax.swing.JFrame {
                                     .addComponent(giveUpButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(casa8Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(casa5Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(casa2Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(casa3Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(casa6Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(casa9Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(10, 10, 10))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(50, 50, 50)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                                    .addComponent(jLabel1)
+                                    .addComponent(casa2Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jogadorVezLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(50, 50, 50)))
+                                .addGap(7, 7, 7)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(casa6Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(casa3Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(casa9Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(37, 37, 37)
+                                .addComponent(jLabel1)))
+                        .addGap(28, 28, 28)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(26, 26, 26)
-                                .addComponent(player2NameLabel))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(90, 90, 90)
-                                .addComponent(player2Label)))
-                        .addGap(26, 26, 26)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(player2Label)
+                                .addGap(34, 34, 34))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                                .addComponent(derrotasLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(player2NameLabel)))
+                        .addGap(18, 18, 18)
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(exitJButton, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(inviteFriendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(refreshOnlineButton, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(jLabel2)))
-                        .addGap(2, 2, 2))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(inviteFriendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(refreshOnlineButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(26, 26, 26)))
+                                .addComponent(exitJButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jSeparator2)))
@@ -342,7 +364,7 @@ public class NewJFrame extends javax.swing.JFrame {
                 .addComponent(interfacesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 286, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(connectButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(121, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -359,23 +381,19 @@ public class NewJFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jogadorVezLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLabel12)
-                                        .addGap(32, 32, 32)
-                                        .addComponent(player1Label))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(player2NameLabel)
-                                        .addGap(32, 32, 32)
-                                        .addComponent(player2Label))))
+                                .addGap(115, 115, 115)
+                                .addComponent(jLabel12)
+                                .addGap(32, 32, 32)
+                                .addComponent(player1Label)
+                                .addGap(18, 18, 18)
+                                .addComponent(vitoriasLabel))
                             .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jogadorVezLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(4, 4, 4)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
@@ -388,39 +406,40 @@ public class NewJFrame extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                     .addComponent(casa5Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                    .addComponent(casa4Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(casa7Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(86, 86, 86)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(casa8Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(casa4Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(casa6Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                             .addGroup(layout.createSequentialGroup()
-                                                .addComponent(casa6Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(player2NameLabel)
+                                                .addGap(32, 32, 32)
+                                                .addComponent(player2Label)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(derrotasLabel)))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addGroup(layout.createSequentialGroup()
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(casa9Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))))))
+                                                .addComponent(casa7Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(casa9Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(172, 172, 172)
+                                        .addComponent(casa8Label, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addGap(18, 18, 18)
                         .addComponent(giveUpButton)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(22, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(385, 385, 385)
-                                        .addComponent(exitJButton))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addComponent(jLabel2)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(inviteFriendButton)
-                                            .addComponent(refreshOnlineButton))
-                                        .addGap(35, 35, 35)))
-                                .addGap(0, 9, Short.MAX_VALUE)))
-                        .addContainerGap())))
+                        .addComponent(jSeparator1)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(inviteFriendButton)
+                            .addComponent(refreshOnlineButton)
+                            .addComponent(exitJButton))
+                        .addGap(26, 26, 26))))
         );
 
         pack();
@@ -446,9 +465,12 @@ public class NewJFrame extends javax.swing.JFrame {
         try {
             enviarMsg(message, InetAddress.getByName(address), 20181);
             adversario = onlineList.getSelectedValue();
+            servidor.setEndTimeMillis(System.currentTimeMillis());
         } catch (IOException ex) {
             Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        
     }//GEN-LAST:event_inviteFriendButtonActionPerformed
 
     private void giveUpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_giveUpButtonActionPerformed
@@ -465,7 +487,7 @@ public class NewJFrame extends javax.swing.JFrame {
             String mensagem = "01";
             mensagem += String.format("%03d", apelido.length() + 5);
             mensagem += apelido;
-            broadcastMsg(mensagem, InetAddress.getByName("255.255.255.255"), porta);
+            servidor.enviarMsg(mensagem, InetAddress.getByName("255.255.255.255"), porta);
             onlineUsers.clear();
         } catch (IOException ex) {
             System.out.println("Aconteceu um erro no envio de mensagem de login");
@@ -488,7 +510,7 @@ public class NewJFrame extends javax.swing.JFrame {
             interfacesComboBox.setEnabled(true);
 
         } else {
-            
+
             int nInterface = interfacesComboBox.getSelectedIndex();
             if (nInterface < 0) {
                 interfacesComboBox.requestFocus();
@@ -502,21 +524,21 @@ public class NewJFrame extends javax.swing.JFrame {
                 addr = InetAddress.getByName(strParts[0]);
 
                 server = new ServerSocket(20181, 10, addr);
-                
+
                 estaEscutando = true;
                 connectButton.setText("Desconectar");
                 jTextField1.setEnabled(false);
                 interfacesComboBox.setEnabled(false);
                 onlineUsers.clear();
                 apelido = jTextField1.getText();
-                
+
                 servidor = new ServidorJogo(this, server, apelido, onlineUsers, addr);
                 servidor.execute();
-                
+
                 String mensagem = "01";
                 mensagem += String.format("%03d", apelido.length() + 5);
                 mensagem += apelido;
-                
+
                 broadcastMsg(mensagem, InetAddress.getByName("255.255.255.255"), porta);
             } catch (IOException ex) {
                 //Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -528,46 +550,55 @@ public class NewJFrame extends javax.swing.JFrame {
     private void casa1LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa1LabelActionPerformed
         casa1Label.setText(peca);
         conexao.enviaMensagem("080061");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa1LabelActionPerformed
 
     private void casa2LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa2LabelActionPerformed
         casa2Label.setText(peca);
         conexao.enviaMensagem("080062");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa2LabelActionPerformed
 
     private void casa3LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa3LabelActionPerformed
         casa3Label.setText(peca);
         conexao.enviaMensagem("080063");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa3LabelActionPerformed
 
     private void casa4LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa4LabelActionPerformed
         casa4Label.setText(peca);
         conexao.enviaMensagem("080064");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa4LabelActionPerformed
 
     private void casa5LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa5LabelActionPerformed
         casa5Label.setText(peca);
         conexao.enviaMensagem("080065");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa5LabelActionPerformed
 
     private void casa6LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa6LabelActionPerformed
         casa6Label.setText(peca);
         conexao.enviaMensagem("080066");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa6LabelActionPerformed
 
     private void casa7LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa7LabelActionPerformed
         casa7Label.setText(peca);
         conexao.enviaMensagem("080067");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa7LabelActionPerformed
 
     private void casa8LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa8LabelActionPerformed
         casa8Label.setText(peca);
         conexao.enviaMensagem("080068");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa8LabelActionPerformed
 
     private void casa9LabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_casa9LabelActionPerformed
         casa9Label.setText(peca);
         conexao.enviaMensagem("080069");
+        bloqueiaTabuleiro(true);
     }//GEN-LAST:event_casa9LabelActionPerformed
 
     /**
@@ -605,30 +636,6 @@ public class NewJFrame extends javax.swing.JFrame {
         });
     }
 
-    /**
-     * Função para conectar o cliente à porta sugerida para o jogo, para troca
-     * de mensagens entre os dois jogadores
-     */
-    public void connectClient() {
-
-        // atribui servidor e porta
-        String strServidor = interfaces.get(0);
-        int porta = 20181;
-
-        try {
-            // tenta conexão na porta e interface escolhidas
-            clientSocket = new Socket(strServidor, 20181);
-
-            conexao = new MinhaConexao(this, clientSocket/*, onlineUsers*/);
-            conexao.execute();
-        } catch (IOException ex) {
-            String msg = "Erro na criação do Socket.\n" + ex.getMessage();
-            JOptionPane.showMessageDialog(this, msg, "Criação do Socket",
-                    JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
-    }
-
     public void encerraServer() {
         try {
             // encerra conexao
@@ -655,10 +662,9 @@ public class NewJFrame extends javax.swing.JFrame {
 
         DatagramPacket packet = new DatagramPacket(broadcastMessage.getBytes(), broadcastMessage.getBytes().length, address, port);
         socketBroadcast.send(packet);
-        socketBroadcast.close();
     }
-    
-    public void broadcastMsg(String broadcastMessage, InetAddress address, int port) 
+
+    public void broadcastMsg(String broadcastMessage, InetAddress address, int port)
             throws IOException {
         DatagramSocket socketBroadcast = null;
         socketBroadcast = new DatagramSocket(0, addr);
@@ -666,42 +672,41 @@ public class NewJFrame extends javax.swing.JFrame {
 
         DatagramPacket packet = new DatagramPacket(broadcastMessage.getBytes(), broadcastMessage.getBytes().length, address, port);
         socketBroadcast.send(packet);
-        socketBroadcast.close();
     }
-    
-    public void jogadaRecebida(int posicao){
-        switch(posicao){
+
+    public void jogadaRecebida(int posicao) {
+        switch (posicao) {
             case 1:
-                casa2Label.setText(peca);
+                casa2Label.setText(pecaAdversario);
                 break;
             case 2:
-                casa2Label.setText(peca);
+                casa2Label.setText(pecaAdversario);
                 break;
             case 3:
-                casa3Label.setText(peca);
+                casa3Label.setText(pecaAdversario);
                 break;
             case 4:
-                casa4Label.setText(peca);
+                casa4Label.setText(pecaAdversario);
                 break;
             case 5:
-                casa5Label.setText(peca);
+                casa5Label.setText(pecaAdversario);
                 break;
             case 6:
-                casa6Label.setText(peca);
+                casa6Label.setText(pecaAdversario);
                 break;
             case 7:
-                casa7Label.setText(peca);
+                casa7Label.setText(pecaAdversario);
                 break;
             case 8:
-                casa8Label.setText(peca);
+                casa8Label.setText(pecaAdversario);
                 break;
             case 9:
-                casa9Label.setText(peca);
+                casa9Label.setText(pecaAdversario);
                 break;
         }
-        if((casa2Label.getText().equals(pecaAdversario) && 
-            casa2Label.getText().equals(pecaAdversario) && 
-                casa3Label.getText().equals(pecaAdversario)) ||
+        if ((casa2Label.getText().equals(pecaAdversario) && 
+                casa2Label.getText().equals(pecaAdversario) && 
+                casa3Label.getText().equals(pecaAdversario)) || 
             (casa2Label.getText().equals(pecaAdversario) && 
                 casa5Label.getText().equals(pecaAdversario) && 
                 casa9Label.getText().equals(pecaAdversario)) || 
@@ -722,28 +727,79 @@ public class NewJFrame extends javax.swing.JFrame {
                 casa3Label.getText().equals(pecaAdversario)) || 
             (casa7Label.getText().equals(pecaAdversario) && 
                 casa8Label.getText().equals(pecaAdversario) && 
-                casa9Label.getText().equals(pecaAdversario))){
-            
+                casa9Label.getText().equals(pecaAdversario))) {
+
             String mensagem9 = "09005";
-            
             conexao.enviaMensagem(mensagem9);
+            
+            derrotas++;
+            derrotasLabel.setText("Vitorias: " + derrotas);
+            esvaziaTabuleiro();
+        } else if (isFull()) {
+            
+            esvaziaTabuleiro();
+            String mensagem9 = "09005";
+            conexao.enviaMensagem(mensagem9);
+            
         }
     }
+
+    public void esvaziaTabuleiro(){
+        casa1Label.setText(" ");
+        casa2Label.setText(" ");
+        casa3Label.setText(" ");
+        casa4Label.setText(" ");
+        casa5Label.setText(" ");
+        casa6Label.setText(" ");
+        casa7Label.setText(" ");
+        casa8Label.setText(" ");
+        casa9Label.setText(" ");
+    }
     
+    public void bloqueiaTabuleiro(boolean bloquear) {
+        casa1Label.setEnabled(!bloquear);
+        casa2Label.setEnabled(!bloquear);
+        casa3Label.setEnabled(!bloquear);
+        casa4Label.setEnabled(!bloquear);
+        casa5Label.setEnabled(!bloquear);
+        casa6Label.setEnabled(!bloquear);
+        casa7Label.setEnabled(!bloquear);
+        casa8Label.setEnabled(!bloquear);
+        casa9Label.setEnabled(!bloquear);
+    }
+
     public void setAdversario(String adversario) {
         this.adversario = adversario;
+        this.player2NameLabel.setText(adversario);
     }
 
     public void setPorta(int porta) {
         this.porta = porta;
     }
 
-    public void setPeca(String peca) {
-        this.peca = peca;
-    }
-
     public void setConexao(MinhaConexao conexao) {
         this.conexao = conexao;
+    }
+    
+    public void setJogadorVez(String peca){
+        this.jogadorVezLabel.setText(peca);
+    }
+    
+    public void incrementaVitoria(){
+        this.vitorias++;
+        this.vitoriasLabel.setText("Vitórias: " + vitorias);
+    }
+    
+    public boolean isFull(){
+        return !casa1Label.getText().isEmpty() && 
+                !casa2Label.getText().isEmpty() && 
+                !casa3Label.getText().isEmpty() && 
+                !casa4Label.getText().isEmpty() && 
+                !casa5Label.getText().isEmpty() && 
+                !casa6Label.getText().isEmpty() && 
+                !casa7Label.getText().isEmpty() && 
+                !casa8Label.getText().isEmpty() && 
+                !casa9Label.getText().isEmpty();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -757,6 +813,7 @@ public class NewJFrame extends javax.swing.JFrame {
     private javax.swing.JButton casa8Label;
     private javax.swing.JButton casa9Label;
     private javax.swing.JButton connectButton;
+    private javax.swing.JLabel derrotasLabel;
     private javax.swing.JButton exitJButton;
     private javax.swing.JButton giveUpButton;
     private javax.swing.JComboBox<String> interfacesComboBox;
@@ -778,5 +835,6 @@ public class NewJFrame extends javax.swing.JFrame {
     private javax.swing.JLabel player2Label;
     private javax.swing.JLabel player2NameLabel;
     private javax.swing.JButton refreshOnlineButton;
+    private javax.swing.JLabel vitoriasLabel;
     // End of variables declaration//GEN-END:variables
 }

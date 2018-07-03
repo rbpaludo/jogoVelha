@@ -15,6 +15,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
+import java.util.Random;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -23,103 +24,70 @@ import javax.swing.SwingWorker;
  *
  * @author willi
  */
-public class MinhaConexao extends SwingWorker<Boolean, String>  {
+public class MinhaConexao extends SwingWorker<Boolean, String> {
+
     private Socket socket;
     private NewJFrame mainFrame;
     private DefaultListModel mensagens;
-    
+
     // leitura dos dados
-    private InputStream entrada;  
-    private InputStreamReader inr;  
+    private InputStream entrada;
+    private InputStreamReader inr;
     private BufferedReader bfr;
-    
+
     // envio dos dados
-    private OutputStream saida;  
-    private OutputStreamWriter outw;  
-    private BufferedWriter bfw;      
+    private OutputStream saida;
+    private OutputStreamWriter outw;
+    private BufferedWriter bfw;
     
-    public MinhaConexao(NewJFrame mainFrame, Socket socket/*,
-                        DefaultListModel mensagens*/) throws SocketException
-    {
+    private int vez;
+
+    public MinhaConexao(NewJFrame mainFrame, Socket socket, boolean convidado) throws SocketException {
         this.mainFrame = mainFrame;
         this.socket = socket;
         //this.mensagens = mensagens;
+
+        Random random = new Random();
         
-        try
-        {
-            entrada  = socket.getInputStream();
+        try {
+            entrada = socket.getInputStream();
             inr = new InputStreamReader(entrada);
             bfr = new BufferedReader(inr);
-            
-            saida =  this.socket.getOutputStream();
+
+            saida = this.socket.getOutputStream();
             outw = new OutputStreamWriter(saida);
-            bfw = new BufferedWriter(outw); 
-        }
-        catch (IOException e)
-        {
+            bfw = new BufferedWriter(outw);
+        } catch (IOException e) {
             publish("Erro na conexão com o servidor");
             publish(e.getMessage());
-        } 
-        
+        }
+
         publish("Servidor conectado na porta " + socket.getLocalPort());
+        
+        if(convidado){
+            vez = 1;
+        } else {
+            vez = 2;
+            int comeco = random.nextInt(2) + 1;
+            String mensagem = "07006" + comeco;
+            enviaMensagem(mensagem);
+            
+            if(comeco == 2){
+                this.mainFrame.bloqueiaTabuleiro(false);
+            }
+        }
     }
 
     @Override
     protected Boolean doInBackground() throws Exception {
         String incommingMessage;
-        while(true)
-        {
-            try
-            {
-                incommingMessage = (String)bfr.readLine();
-                
+        while (true) {
+            try {
+                incommingMessage = (String) bfr.readLine();
+                publish(incommingMessage);
                 // Recebeu uma mensagem?
-                if (incommingMessage != null)
-                {
-                    String msg = "Recebida: " + incommingMessage;
-                    publish(msg);
-                    
-                    switch(incommingMessage.substring(0, 2)){
-                        case "07":
-                            // my turn? send
-                            break;
-                        
-                        case "08":
-                            // did he/she win? 
-                                // send message 9
-                                // send message 8
-                            // send message 8
-                            break;
-                        
-                        case "09":
-                            // clear board, add 1 victory
-                            break;
-                            
-                        case "10":
-                            // terminate connection
-                    }
-                    // lidar com a mensagem recebida
-                }
-                else
-                {
-                    publish("Conexão foi encerrada.");
 
-                    // encerra atributos de comunicação
-                    bfr.close();
-                    inr.close();  
-                    entrada.close();  
-                    bfw.close();
-                    outw.close();  
-                    saida.close();  
-                    socket.close();
-                    
-                    mainFrame.encerraServer();
-                    
-                    Thread.currentThread().stop();
-                }
-            }
-            catch(IOException e)
-            {
+            } catch (IOException e) {
                 // mostra mensagem de erro
                 JOptionPane.showMessageDialog(mainFrame,
                         "Erro na leitura\n" + e.getMessage(),
@@ -128,27 +96,81 @@ public class MinhaConexao extends SwingWorker<Boolean, String>  {
             }
         }
     }
-    
+
     @Override
-    protected void process(List<String> msg)
-    {
-        for (int i = 0; i < msg.size(); i++)
-            JOptionPane.showMessageDialog(null, msg.get(i));
+    protected void process(List<String> msg) {
+        for (int i = 0; i < msg.size(); i++) {
+            try {
+                if (msg.get(i) != null) {
+                    String mensagem = "Recebida: " + msg.get(i);
+                    publish(mensagem);
+
+                    switch (msg.get(i).substring(0, 2)) {
+                        case "07":
+                            // my turn? enable the board; 
+                            if (Integer.parseInt(msg.get(i).substring(5)) == vez) {
+                                mainFrame.bloqueiaTabuleiro(false);
+                                mainFrame.setJogadorVez("X");
+                            // it's not? Well, then disable it
+                            } else {
+                                mainFrame.bloqueiaTabuleiro(true);
+                                mainFrame.setJogadorVez("O");
+                            }
+                            break;
+
+                        case "08":
+                            mainFrame.bloqueiaTabuleiro(false);
+                            mainFrame.jogadaRecebida(Integer.parseInt(msg.get(i).substring(msg.get(i).length() - 1)));
+                            mainFrame.setJogadorVez("X");
+                            break;
+
+                        case "09":
+                            // clear board, add 1 victory
+                            mainFrame.esvaziaTabuleiro();
+                            mainFrame.setJogadorVez("O");
+                            
+                            if(!mainFrame.isFull()){
+                                mainFrame.incrementaVitoria();
+                            }
+                            break;
+
+                        case "10":
+                        // terminate connection
+                            JOptionPane.showMessageDialog(mainFrame, "O adversário desistiu!");
+                    }
+                    // lidar com a mensagem recebida
+                } else {
+                    publish("Conexão foi encerrada.");
+
+                    // encerra atributos de comunicação
+                    bfr.close();
+                    inr.close();
+                    entrada.close();
+                    bfw.close();
+                    outw.close();
+                    saida.close();
+                    socket.close();
+
+                    mainFrame.encerraServer();
+
+                    Thread.currentThread().stop();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
-    
-    public boolean enviaMensagem(String msg)
-    {
-        try
-        {
+
+    public boolean enviaMensagem(String msg) {
+        try {
             outw.write(msg + "\n");
             outw.flush();
             System.out.println("Mensagem enviada: " + msg);
             return true;
-        }catch(IOException ex)
-        {
+        } catch (IOException ex) {
             publish("Erro ao enviar mensagem.");
             return false;
         }
     }
-    
+
 }

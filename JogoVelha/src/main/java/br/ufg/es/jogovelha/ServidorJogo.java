@@ -14,6 +14,10 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -33,6 +37,8 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
     private Random random = new Random();
     private MinhaConexao novaConexao;
     private Socket socketCliente;
+    private long endTimeMillis = -1;
+    private long timeoutInterval = 30000;
 
     public ServidorJogo(NewJFrame mainFrame, ServerSocket server,
             String apelido, DefaultListModel onlineUsers, InetAddress addr) {
@@ -48,6 +54,24 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
         } catch (SocketException ex) {
             ex.printStackTrace();
         }
+
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+
+                try {
+                    String mensagem = "01";
+                    mensagem += String.format("%03d", apelido.length() + 5);
+                    mensagem += apelido;
+
+                    enviarMsg(mensagem, InetAddress.getByName("255.255.255.255"), 20181);
+                } catch (IOException ex) {
+                    Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }, 180000, 180000);
     }
 
     @Override
@@ -58,25 +82,33 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
 
             // escutando na porta tal
             while (true) {
+                if (endTimeMillis != -1) {
+                    if(System.currentTimeMillis() > endTimeMillis + timeoutInterval){
+                        JOptionPane.showMessageDialog(mainFrame, "O jogador convidado demorou demais para responder...");
+                    }
+                }
                 if (inGame) {
                     // espera conexão
                     Socket connection = server.accept();
 
                     // cria conexão com cliente
-                    novaConexao = new MinhaConexao(mainFrame, connection);
+                    novaConexao = new MinhaConexao(mainFrame, connection, false);
                     mainFrame.setConexao(novaConexao);
                     // processa as comunicações com o cliente
                     novaConexao.execute();
+                    endTimeMillis = -1;
                 }
                 DatagramPacket packet;
                 byte[] buf = new byte[256];
                 packet = new DatagramPacket(buf, buf.length);
                 socketBroadcast.receive(packet);
-                msgReceb = new String(packet.getData());
-                System.out.println(msgReceb);
+
+                msgReceb = new String(packet.getData(), "UTF-8")/*.trim()*/;
+                System.out.println("Recebida: " + msgReceb);
                 publish(msgReceb + " - " + packet.getAddress().getHostAddress());
             }
         } catch (IOException ex) {
+            ex.printStackTrace();
             return false;
         }
     }
@@ -87,14 +119,13 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
         String address;
         String apelidoOnline;
         int porta = 0;
-        
-        for(String msgReceb : msg){
+
+        for (String msgReceb : msg) {
             address = msgReceb.split(" - ")[1];
-            try{
-            switch (msgReceb.substring(0, 2)) {
+            try {
+                switch (msgReceb.substring(0, 2)) {
                     case "01":
                         // responder com mensagem 2 para o remetente
-                        System.out.println("ALOOOOOOU");
                         msgEnviar = "02";
                         msgEnviar += String.format("%03d",
                                 apelido.length() + 5);
@@ -104,14 +135,17 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
                                 20181);
                         apelidoOnline = msgReceb.substring(5,
                                 msgReceb.length()) + "-" + InetAddress.getByName(address);
-                        onlineUsers.addElement(apelidoOnline);
+                        if (!apelidoOnline.split("-")[0].equals(apelido + " ")) {
+                            onlineUsers.addElement(apelidoOnline);
+                        }
                         break;
                     case "02":
                         // adicionar o remetente à lista de usuários ativos
                         apelidoOnline = msgReceb.substring(5,
                                 msgReceb.length()) + "-" + InetAddress.getByName(address);
-                        onlineUsers.addElement(apelidoOnline);
-                        System.out.println("Alou, eu adicionei alguem e nao funcionou");
+                        if (!apelidoOnline.split("-")[0].equals(apelido + " ")) {
+                            onlineUsers.addElement(apelidoOnline);
+                        }
                         break;
                     case "03":
                         // remover o remetente`da lista de usuários ativos
@@ -136,11 +170,13 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
                             msgEnviar += apelido;
                             msgEnviar += "|" + porta;
                             enviarMsg(msgEnviar, InetAddress.getByName(address), 20181);
+                            endTimeMillis = System.currentTimeMillis();
                         } else {
                             msgEnviar += String.format("%03d", apelido.length() + 7);
                             msgEnviar += apelido;
                             msgEnviar += "|0";
                             enviarMsg(msgEnviar, InetAddress.getByName(address), 20181);
+                            endTimeMillis = -1;
                         }
                         break;
                     case "05":
@@ -151,17 +187,23 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
                             server = new ServerSocket(porta, 10, server.getInetAddress());
                             inGame = true;
                             enviarMsg(msgEnviar, InetAddress.getByName(address), 20181);
-                        } else {
 
+                            endTimeMillis = System.currentTimeMillis();
+                        } else {
+                            JOptionPane.showMessageDialog(mainFrame, "O convite foi rejeitado");
+                            endTimeMillis = -1;
                         }
                         break;
                     case "06":
                         // conectar na porta informada
                         socketCliente = new Socket(InetAddress.getByName(address), porta);
+                        novaConexao = new MinhaConexao(this.mainFrame, socketCliente, true);
+                        novaConexao.execute();
+                        endTimeMillis = -1;
                         break;
 
                 }
-            }catch(IOException ex){
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
@@ -181,6 +223,9 @@ public class ServidorJogo extends SwingWorker<Boolean, String> {
 
         DatagramPacket sentPacket = new DatagramPacket(buffer, buffer.length, address, port);
         socketBroadcast.send(sentPacket);
-        socketBroadcast.close();
+    }
+
+    public void setEndTimeMillis(long endTimeMillis) {
+        this.endTimeMillis = endTimeMillis;
     }
 }
